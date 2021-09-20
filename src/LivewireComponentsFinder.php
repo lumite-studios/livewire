@@ -4,20 +4,22 @@ namespace Livewire;
 
 use Exception;
 use ReflectionClass;
+use Illuminate\Support\Str;
+use Illuminate\Support\Composer;
 use Illuminate\Filesystem\Filesystem;
 use Symfony\Component\Finder\SplFileInfo;
 
 class LivewireComponentsFinder
 {
-    protected $path;
+    protected $namespaces;
     protected $files;
     protected $manifest;
     protected $manifestPath;
 
-    public function __construct(Filesystem $files, $manifestPath, $path)
+    public function __construct(Filesystem $files, $manifestPath, $namespaces)
     {
         $this->files = $files;
-        $this->path = $path;
+        $this->namespaces = $namespaces;
         $this->manifestPath = $manifestPath;
     }
 
@@ -62,16 +64,18 @@ class LivewireComponentsFinder
 
     public function getClassNames()
     {
-        return collect($this->files->allFiles($this->path))
-            ->map(function (SplFileInfo $file) {
-                return app()->getNamespace().
-                    str($file->getPathname())
-                        ->after(app_path().'/')
-                        ->replace(['/', '.php'], ['\\', ''])->__toString();
-            })
-            ->filter(function (string $class) {
-                return is_subclass_of($class, Component::class) &&
-                    ! (new ReflectionClass($class))->isAbstract();
-            });
+		return collect($this->namespaces)->flatMap(function($namespace) {
+			return $this->getClassesInNamespace($namespace);
+		})->filter(function(string $class) {
+			return is_subclass_of($class, Component::class) &&
+				! (new \ReflectionClass($class))->isAbstract();
+		});
+    }
+
+    private function getClassesInNamespace($namespace)
+    {
+        return collect(get_declared_classes())->filter(function($class) use($namespace) {
+            return Str::contains($class, $namespace);
+        });
     }
 }

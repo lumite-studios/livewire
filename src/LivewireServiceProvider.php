@@ -81,7 +81,7 @@ class LivewireServiceProvider extends ServiceProvider
                 // If the app overrode "TrimStrings".
                 \App\Http\Middleware\TrimStrings::class,
             ]);
-        }   
+        }
     }
 
     protected function registerLivewireSingleton()
@@ -106,9 +106,7 @@ class LivewireServiceProvider extends ServiceProvider
             return new LivewireComponentsFinder(
                 new Filesystem,
                 config('livewire.manifest_path') ?: $defaultManifestPath,
-                ComponentParser::generatePathFromNamespace(
-                    config('livewire.class_namespace')
-                )
+                Livewire::getNamespaces(),
             );
         });
     }

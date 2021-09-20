@@ -10,6 +10,7 @@ use Livewire\Exceptions\ComponentNotFoundException;
 class LivewireManager
 {
     protected $listeners = [];
+    protected $namespaces = [];
     protected $componentAliases = [];
     protected $queryParamsForTesting = [];
 
@@ -27,6 +28,16 @@ class LivewireManager
     ];
 
     public static $isLivewireRequestTestingOverride = false;
+
+    public function addNamespace($namespace)
+    {
+        $this->namespaces[] = $namespace;
+    }
+
+    public function getNamespaces()
+    {
+        return array_merge($this->namespaces, [config('livewire.class_namespace')]);
+    }
 
     public function component($alias, $viewClass = null)
     {

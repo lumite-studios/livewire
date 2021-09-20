@@ -14,6 +14,7 @@ use Livewire\Exceptions\PropertyNotFoundException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Livewire\Exceptions\CannotUseReservedLivewireComponentProperties;
+use Livewire\Livewire;
 
 abstract class Component
 {
@@ -92,7 +93,7 @@ abstract class Component
     public function bootIfNotBooted()
     {
         if (method_exists($this, $method = 'boot')) {
-            ImplicitlyBoundMethod::call(app(), [$this, $method]); 
+            ImplicitlyBoundMethod::call(app(), [$this, $method]);
         }
     }
 
@@ -100,7 +101,7 @@ abstract class Component
     {
         foreach (class_uses_recursive($class = static::class) as $trait) {
             if (method_exists($class, $method = 'boot'.class_basename($trait))) {
-                ImplicitlyBoundMethod::call(app(), [$this, $method]); 
+                ImplicitlyBoundMethod::call(app(), [$this, $method]);
             }
 
             if (method_exists($class, $method = 'initialize'.class_basename($trait))) {
@@ -111,9 +112,12 @@ abstract class Component
 
     public static function getName()
     {
-        $namespace = collect(explode('.', str_replace(['/', '\\'], '.', config('livewire.class_namespace'))))
-            ->map([Str::class, 'kebab'])
-            ->implode('.');
+		$namespaces = collect(Livewire::getNamespaces())->map(function($namespace) {
+			return collect(explode('.', str_replace(['/', '\\'], '.', $namespace)))
+				->map([Str::class, 'kebab'])
+				->implode('.');
+		});
+        dd($namespaces);
 
         $fullName = collect(explode('.', str_replace(['/', '\\'], '.', static::class)))
             ->map([Str::class, 'kebab'])
