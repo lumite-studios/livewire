@@ -67,7 +67,7 @@ class LivewireComponentsFinder
 
     public function getClassNames()
     {
-		return collect($this->namespaces)->flatMap(function($namespace) {
+		return collect($this->namespaces)->flatMap(function($prefix, $namespace) {
 			return $this->getClassesInNamespace($namespace);
 		})->filter(function(string $class) {
 			return is_subclass_of($class, Component::class) &&

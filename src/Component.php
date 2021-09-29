@@ -112,17 +112,27 @@ abstract class Component
 
     public static function getName()
     {
-		$namespaces = collect(config('livewire.class_namespace'))->map(function($namespace) {
-			return collect(explode('.', str_replace(['/', '\\'], '.', $namespace)))
-				->map([Str::class, 'kebab'])
-				->implode('.');
-		});
-
         $fullName = collect(explode('.', str_replace(['/', '\\'], '.', static::class)))
             ->map([Str::class, 'kebab'])
             ->implode('.');
 
-		return $fullName;
+		$name = collect(Livewire::getNamespaces())->flatMap(function($prefix, $namespace) {
+			return [collect(explode('.', str_replace(['/', '\\'], '.', $namespace)))
+				->map([Str::class, 'kebab'])
+				->implode('.') => $prefix];
+		})->filter(function($prefix, $namespace) use($fullName) {
+            return str($fullName)->startsWith($namespace);
+        })->map(function($prefix, $namespace) use($fullName) {
+            if(str($fullName)->startsWith($namespace)) {
+                if($prefix) {
+                    return $prefix.'.'.str($fullName)->substr(strlen($namespace) + 1);
+                }
+                return str($fullName)->substr(strlen($namespace) + 1);
+            }
+            return $fullName;
+        })->first();
+
+        return (string) $name ?? $fullName;
     }
 
     public function getQueryString()

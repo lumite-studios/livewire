@@ -29,14 +29,14 @@ class LivewireManager
 
     public static $isLivewireRequestTestingOverride = false;
 
-    public function addNamespace($namespace)
+    public function addNamespace($namespace, $prefix = null)
     {
-        $this->namespaces[] = $namespace;
+        $this->namespaces[$namespace] = $prefix;
     }
 
     public function getNamespaces()
     {
-        return array_merge($this->namespaces, [config('livewire.class_namespace')]);
+        return array_merge($this->namespaces, [config('livewire.class_namespace') => null]);
     }
 
     public function component($alias, $viewClass = null)
