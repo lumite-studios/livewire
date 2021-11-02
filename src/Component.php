@@ -31,8 +31,9 @@ abstract class Component
 
     protected $queryString = [];
     protected $computedPropertyCache = [];
-    protected $shouldSkipRender = false;
+    protected $shouldSkipRender = null;
     protected $preRenderedView;
+    protected $forStack = [];
 
     public function __construct($id = null)
     {
@@ -66,6 +67,7 @@ abstract class Component
         }
 
         $manager = LifecycleManager::fromInitialInstance($instance)
+            ->boot()
             ->initialHydrate()
             ->mount($componentParams)
             ->renderToView();
@@ -267,6 +269,21 @@ abstract class Component
                 unset($this->computedPropertyCache[$i]);
             }
         });
+    }
+
+    public function addToStack($stack, $type, $contents, $key = null)
+    {
+        $this->forStack[] = [
+            'key' => $key ?: $this->id,
+            'stack' => $stack,
+            'type' => $type,
+            'contents' => $contents,
+        ];
+    }
+
+    public function getForStack()
+    {
+        return $this->forStack;
     }
 
     public function __get($property)
